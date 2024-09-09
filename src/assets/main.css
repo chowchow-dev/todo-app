@@ -1,0 +1,5 @@
+@import './base.css';
+
+body {
+  margin: calc(2 * var(--spacing));
+}
