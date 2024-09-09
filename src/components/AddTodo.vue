@@ -15,16 +15,17 @@ const handleSubmit = (e) => {
 }
 </script>
 <template>
-  <form :class="$style.formContainer" @submit.prevent="handleSubmit">
+  <form :class="$style.formContainer" @submit.prevent="handleSubmit" data-testid="add-todo-form">
     <div :class="$style.newTaskForm">
       <label for="new-task">➕ Add a task</label>
       <input
-        :class="[$style.newTaskInput, { [$style.focused]: isFocused }]"
+        data-testid="new-task"
         id="new-task"
         autocomplete="off"
         type="text"
         placeholder="Try typing 'Buy milk'"
         title="Click to start adding a task"
+        :class="[$style.newTaskInput, { [$style.focused]: isFocused }]"
         v-model="newTaskInput"
         @focus="isFocused = true"
         @blur="isFocused = false"

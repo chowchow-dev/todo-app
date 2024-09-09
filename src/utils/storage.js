@@ -15,4 +15,8 @@ export class Storage {
   removeItem(key) {
     this.storage.removeItem(`${this.prefix}-${key}`)
   }
+
+  clear() {
+    this.storage.clear()
+  }
 }

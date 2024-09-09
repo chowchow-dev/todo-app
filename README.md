@@ -30,8 +30,8 @@ pnpm build
 pnpm test:unit
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+### Run Unit Test Coverage
 
 ```sh
-pnpm lint
+pnpm unit:test:coverage
 ```

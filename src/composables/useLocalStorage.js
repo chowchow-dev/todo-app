@@ -12,8 +12,13 @@ export function useLocalStorage(key) {
     storage.setItem(key, JSON.stringify(data))
   }
 
+  const clearLocalData = () => {
+    storage.clear()
+  }
+
   return {
     getLocalData,
-    setLocalData
+    setLocalData,
+    clearLocalData
   }
 }
