@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   build:
-    name: Test
+    name: Build and Test
     runs-on: ubuntu-latest
 
     steps:
@@ -59,6 +59,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      pages: write
 
     steps:
       - name: Download artifact
