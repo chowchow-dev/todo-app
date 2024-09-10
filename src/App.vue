@@ -44,9 +44,42 @@ const handleAdd = (title) => {
   tasks.value = [newTask, ...tasks.value]
 }
 
-watch(tasks, (newTasks) => {
-  localStorage.setLocalData(newTasks)
-})
+const draggedIndex = ref(null)
+const draggedSection = ref(null)
+
+const handleDragStart = (index, section) => {
+  console.log('handleDragStart', index, section)
+  draggedIndex.value = index
+  draggedSection.value = section
+}
+
+const handleDragOver = (index, section) => {
+  console.log('handleDragOver', index, section, {
+    draggedIndex: draggedIndex.value,
+    section: draggedSection.value
+  })
+  if (draggedIndex.value === null || draggedSection.value !== section) return
+  if (draggedIndex.value !== index) {
+    const [movedTask] = tasks.value.splice(draggedIndex.value, 1)
+    tasks.value.splice(index, 0, movedTask)
+    draggedIndex.value = index
+  }
+}
+
+const handleDrop = () => {
+  console.log('handleDrop')
+  draggedIndex.value = null
+  draggedSection.value = null
+}
+
+watch(
+  tasks,
+  (newTasks) => {
+    console.log('tasks', newTasks)
+    localStorage.setLocalData(newTasks)
+  },
+  { deep: true }
+)
 </script>
 
 <template>
@@ -57,22 +90,30 @@ watch(tasks, (newTasks) => {
     <template v-else>
       <li :class="$style.divider">Todo</li>
       <TodoItem
-        v-for="todo in todoTasks"
+        v-for="(todo, index) in todoTasks"
         :key="todo.id"
         :todo="todo"
+        :dragIndex="index"
         @complete="handleComplete"
         @delete="handleDelete"
+        @dragstart="(index, section) => handleDragStart(index, section)"
+        @dragover="(index, section) => handleDragOver(index, section)"
+        @drop="handleDrop"
       />
     </template>
 
     <template v-if="completedTasks.length > 0">
       <li :class="$style.divider">Completed</li>
       <TodoItem
-        v-for="todo in completedTasks"
-        :key="todo.id"
-        :todo="todo"
+        v-for="(completed, index) in completedTasks"
+        :key="completed.id"
+        :todo="completed"
+        :dragIndex="todoTasks.length + index"
         @reopen="handleReopen"
         @delete="handleDelete"
+        @dragstart="(index, section) => handleDragStart(index, section)"
+        @dragover="(index, section) => handleDragOver(index, section)"
+        @drop="handleDrop"
       />
     </template>
   </ul>

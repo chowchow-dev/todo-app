@@ -139,4 +139,37 @@ describe('App.vue', () => {
       expect.objectContaining({ title: 'Task to complete', completed: true })
     ])
   })
+
+  it('reorders tasks within their respective sections', async () => {
+    const wrapper = mount(App)
+    wrapper.findComponent(AddTodo).vm.$emit('add', 'Task 1')
+    wrapper.findComponent(AddTodo).vm.$emit('add', 'Task 2')
+    wrapper.findComponent(AddTodo).vm.$emit('add', 'Task 3')
+    await flushPromises()
+
+    const todoItems = wrapper.findAllComponents(TodoItem)
+    todoItems[1].vm.$emit('dragstart', 1, 'todo')
+    todoItems[2].vm.$emit('dragover', 2, 'todo')
+    todoItems[2].vm.$emit('drop')
+    await flushPromises()
+
+    const updatedTodoItems = wrapper.findAllComponents(TodoItem)
+    expect(updatedTodoItems[0].props('todo').title).toBe('Task 3')
+    expect(updatedTodoItems[1].props('todo').title).toBe('Task 1')
+    expect(updatedTodoItems[2].props('todo').title).toBe('Task 2')
+
+    // Complete a task
+    wrapper.findComponent(TodoItem).vm.$emit('complete', wrapper.vm.tasks[0].id)
+    await flushPromises()
+
+    // Attempt to drag a completed task to the todo section (should not work)
+    const completedItem = wrapper.findAllComponents(TodoItem).at(3)
+    completedItem.vm.$emit('dragstart', 0, 'completed')
+    todoItems[0].vm.$emit('dragover', 0, 'todo')
+    todoItems[0].vm.$emit('drop')
+    await flushPromises()
+
+    expect(wrapper.vm.completedTasks).toHaveLength(1)
+    expect(wrapper.vm.todoTasks).toHaveLength(2)
+  })
 })

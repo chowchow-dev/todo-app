@@ -3,10 +3,14 @@ const props = defineProps({
   todo: {
     type: Object,
     required: true
+  },
+  dragIndex: {
+    type: Number,
+    required: true
   }
 })
 
-const emit = defineEmits(['delete', 'complete', 'reopen'])
+const emit = defineEmits(['delete', 'complete', 'reopen', 'dragstart', 'dragover', 'drop'])
 
 const handleClickDelete = () => {
   emit('delete', props.todo.id)
@@ -19,9 +23,32 @@ const handleClickTask = () => {
     emit('complete', props.todo.id)
   }
 }
+
+const handleDragStart = (event) => {
+  event.dataTransfer.setData('text/plain', props.dragIndex)
+  emit('dragstart', props.dragIndex, props.todo.completed ? 'completed' : 'todo')
+}
+
+const handleDragOver = (event) => {
+  event.preventDefault()
+  emit('dragover', props.dragIndex, props.todo.completed ? 'completed' : 'todo')
+}
+
+const handleDrop = (event) => {
+  event.preventDefault()
+  const draggedIndex = parseInt(event.dataTransfer.getData('text/plain'), 10)
+  emit('drop', { draggedIndex, targetIndex: props.dragIndex })
+}
 </script>
 <template>
-  <li :class="[$style.task, { [$style.completed]: todo.completed }]" @click.stop="handleClickTask">
+  <li
+    :class="[$style.task, { [$style.completed]: todo.completed }]"
+    draggable="true"
+    @click.stop="handleClickTask"
+    @dragstart="handleDragStart"
+    @dragover="handleDragOver"
+    @drop="handleDrop"
+  >
     <label :class="$style.label" :title="todo.completed ? 'Reopen task' : 'Complete task'">
       <input
         type="checkbox"
