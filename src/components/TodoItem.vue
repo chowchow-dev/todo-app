@@ -8,7 +8,7 @@ const props = defineProps({
 
 const emit = defineEmits(['delete', 'complete', 'reopen'])
 
-const handleDelete = () => {
+const handleClickDelete = () => {
   emit('delete', props.todo.id)
 }
 
@@ -33,11 +33,10 @@ const handleClickTask = () => {
       <span :class="$style.text">{{ todo.title }}</span>
     </label>
     <button
-      type="button"
       title="Delete task"
       :data-task="todo.id"
       :class="$style.delete"
-      @click.stop="handleDelete"
+      @click.stop="handleClickDelete"
     >
       ╳
     </button>
@@ -54,21 +53,25 @@ const handleClickTask = () => {
   position: relative;
 }
 
+.task:hover {
+  background: var(--task-hover-background);
+}
+
 .task .box {
-  appearance: none;
+  height: 100%;
+  width: calc(100% - 1rem - 3 * var(--spacing));
   position: absolute;
   top: 0;
   left: 0;
-  width: calc(100% - 1rem - 3 * var(--spacing));
-  height: 100%;
+  appearance: none;
 }
 
 .task label {
-  cursor: pointer;
   flex: 1;
   display: flex;
   gap: var(--spacing);
   align-items: center;
+  cursor: pointer;
 }
 
 .task:hover .delete,
@@ -103,6 +106,7 @@ const handleClickTask = () => {
 
 .completed .text {
   text-decoration: line-through;
+  color: var(--task-completed-color);
 }
 
 .delete {
