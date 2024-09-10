@@ -2,10 +2,6 @@
 
 A simple todo app built with Vue 3 and Vite.
 
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
 ## Project Setup
 
 ```sh
@@ -34,4 +30,12 @@ pnpm test:unit
 
 ```sh
 pnpm unit:test:coverage
+```
+
+### Deploy to GitHub Pages
+
+- Make sure change to your own settings
+
+```sh
+pnpm run deploy
 ```

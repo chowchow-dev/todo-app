@@ -1,10 +1,12 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: CI Test
 
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ['main']
+    branches: ['build']
+  pull_request:
+    branches: ['build']
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -46,39 +48,3 @@ jobs:
 
       - name: Run unit tests
         run: pnpm test:unit
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: production
-          path: ./dist
-
-  # TODO: make this work
-
-  # deploy:
-  #   name: Deploy
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   if: github.ref == 'refs/heads/main'
-
-  #   environment:
-  #     name: github-pages
-  #     url: ${{ steps.deployment.outputs.page_url }}
-
-  #   permissions:
-  #     contents: write
-  #     pages: write
-
-  #   steps:
-  #     - name: Download artifact
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: production
-  #         path: ./dist
-
-  #     - name: Setup Pages
-  #       uses: actions/configure-pages@v4
-
-  #     - name: Deploy to GitHub Pages
-  #       id: deployment
-  #       uses: actions/deploy-pages@v4
