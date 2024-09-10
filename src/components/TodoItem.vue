@@ -5,7 +5,7 @@ const props = defineProps({
     required: true
   },
   dragId: {
-    type: Number,
+    type: String,
     required: true
   },
   isDragOver: {
