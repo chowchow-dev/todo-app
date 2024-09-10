@@ -75,14 +75,14 @@ jobs:
     #     with:
     #       github_token: ${{ secrets.GITHUB_TOKEN }}
     #       publish_dir: ./dist
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
     environment:
       name: github-pages
-      needs: build
       url: ${{ steps.deployment.outputs.page_url }}
-
-    runs-on: ubuntu-latest
-
-    if: github.ref == 'refs/heads/main'
 
     permissions:
       contents: write
