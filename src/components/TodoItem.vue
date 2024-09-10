@@ -4,7 +4,7 @@ const props = defineProps({
     type: Object,
     required: true
   },
-  dragIndex: {
+  dragId: {
     type: Number,
     required: true
   },
@@ -51,8 +51,8 @@ const handleClickTask = () => {
       }
     ]"
     draggable="true"
-    @dragstart="$emit('dragstart', dragIndex)"
-    @dragover.prevent="$emit('dragover', dragIndex)"
+    @dragstart="$emit('dragstart', dragId)"
+    @dragover.prevent="$emit('dragover', dragId)"
     @dragend="$emit('dragend')"
     @drop="$emit('drop')"
     @click.stop="handleClickTask"

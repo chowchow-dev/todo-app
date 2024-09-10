@@ -8,9 +8,8 @@ import { useLocalStorage } from './composables/useLocalStorage'
 const localStorage = useLocalStorage('tasks')
 
 const tasks = ref(localStorage.getLocalData() || [])
-
 const draggedTask = ref(null)
-const dragOverIndex = ref(null)
+const draggedOverId = ref(null)
 const draggedItemId = ref(null)
 
 const todoTasks = computed(() => {
@@ -48,13 +47,13 @@ const handleAdd = (title) => {
   tasks.value = [newTask, ...tasks.value]
 }
 
-const handleDragStart = (task, index, section) => {
-  draggedTask.value = { task, index, section }
-  draggedItemId.value = task.id
+const handleDragStart = (task, id, section) => {
+  draggedTask.value = { task, id, section }
+  draggedItemId.value = id
 }
 
-const handleDragOver = (index) => {
-  dragOverIndex.value = index
+const handleDragOver = (id) => {
+  draggedOverId.value = id
 }
 
 const handleDragEnd = () => {
@@ -62,24 +61,27 @@ const handleDragEnd = () => {
 }
 
 const handleDrop = () => {
-  if (!draggedTask.value || dragOverIndex.value === null) return
+  if (!draggedTask.value || draggedOverId.value === null) return
 
-  const { task, index: oldIndex, section: oldSection } = draggedTask.value
-  const newIndex = dragOverIndex.value
+  const { task, id: oldId, section: oldSection } = draggedTask.value
+  const newId = draggedOverId.value
 
-  // Remove the task from its original position
-  tasks.value.splice(oldIndex, 1)
+  const newSection = todoTasks.value.some((t) => t.id === newId) ? 'todo' : 'completed'
 
-  // Insert the task at its new position
-  tasks.value.splice(newIndex, 0, task)
-
-  // Update the task's completed status if it's moved between sections
-  if (oldSection !== (newIndex < todoTasks.value.length ? 'todo' : 'completed')) {
-    task.completed = !task.completed
+  if (oldSection !== newSection) {
+    draggedTask.value = null
+    draggedOverId.value = null
+    return
   }
 
+  const oldIndex = tasks.value.findIndex((t) => t.id === oldId)
+  const newIndex = tasks.value.findIndex((t) => t.id === newId)
+
+  tasks.value.splice(oldIndex, 1)
+  tasks.value.splice(newIndex, 0, task)
+
   draggedTask.value = null
-  dragOverIndex.value = null
+  draggedOverId.value = null
 }
 
 watch(
@@ -99,16 +101,16 @@ watch(
     <template v-else>
       <li :class="$style.divider">Todo</li>
       <TodoItem
-        v-for="(todo, index) in todoTasks"
+        v-for="todo in todoTasks"
         :key="todo.id"
         :task="todo"
-        :dragIndex="index"
-        :isDragOver="dragOverIndex === index"
+        :dragId="todo.id"
+        :isDragOver="draggedOverId === todo.id"
         :isDragging="draggedItemId === todo.id"
         @complete="handleComplete"
         @delete="handleDelete"
-        @dragstart="() => handleDragStart(todo, index, 'todo')"
-        @dragover="() => handleDragOver(index)"
+        @dragstart="() => handleDragStart(todo, todo.id, 'todo')"
+        @dragover="() => handleDragOver(todo.id)"
         @dragend="handleDragEnd"
         @drop="handleDrop"
       />
@@ -117,16 +119,16 @@ watch(
     <template v-if="completedTasks.length > 0">
       <li :class="$style.divider">Completed</li>
       <TodoItem
-        v-for="(completed, index) in completedTasks"
+        v-for="completed in completedTasks"
         :key="completed.id"
         :task="completed"
-        :dragIndex="todoTasks.length + index"
-        :isDragOver="dragOverIndex === todoTasks.length + index"
+        :dragId="completed.id"
+        :isDragOver="draggedOverId === completed.id"
         :isDragging="draggedItemId === completed.id"
         @reopen="handleReopen"
         @delete="handleDelete"
-        @dragstart="() => handleDragStart(completed, todoTasks.length + index, 'completed')"
-        @dragover="() => handleDragOver(todoTasks.length + index)"
+        @dragstart="() => handleDragStart(completed, completed.id, 'completed')"
+        @dragover="() => handleDragOver(completed.id)"
         @dragend="handleDragEnd"
         @drop="handleDrop"
       />
