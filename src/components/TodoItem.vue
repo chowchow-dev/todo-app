@@ -1,40 +1,75 @@
 <script setup>
 const props = defineProps({
-  todo: {
+  task: {
     type: Object,
     required: true
+  },
+  dragId: {
+    type: String,
+    required: true
+  },
+  isDragOver: {
+    type: Boolean,
+    default: false
+  },
+  isDragging: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['delete', 'complete', 'reopen'])
+const emit = defineEmits([
+  'delete',
+  'complete',
+  'reopen',
+  'dragstart',
+  'dragover',
+  'dragend',
+  'drop'
+])
 
 const handleClickDelete = () => {
-  emit('delete', props.todo.id)
+  emit('delete', props.task.id)
 }
 
 const handleClickTask = () => {
-  if (props.todo.completed) {
-    emit('reopen', props.todo.id)
+  if (props.task.completed) {
+    emit('reopen', props.task.id)
   } else {
-    emit('complete', props.todo.id)
+    emit('complete', props.task.id)
   }
 }
 </script>
 <template>
-  <li :class="[$style.task, { [$style.completed]: todo.completed }]" @click.stop="handleClickTask">
-    <label :class="$style.label" :title="todo.completed ? 'Reopen task' : 'Complete task'">
+  <li
+    :class="[
+      $style.task,
+      {
+        [$style.completed]: task.completed,
+        [$style.dragging]: isDragging,
+        [$style.dragOver]: isDragOver
+      }
+    ]"
+    draggable="true"
+    @dragstart="$emit('dragstart', dragId)"
+    @dragover.prevent="$emit('dragover', dragId)"
+    @dragend="$emit('dragend')"
+    @drop="$emit('drop')"
+    @click.stop="handleClickTask"
+  >
+    <label :class="$style.label" :title="task.completed ? 'Reopen task' : 'Complete task'">
       <input
         type="checkbox"
         :class="$style.box"
-        :title="todo.completed ? 'Reopen task' : 'Complete task'"
-        :value="todo.id"
-        :checked="todo.completed"
+        :title="task.completed ? 'Reopen task' : 'Complete task'"
+        :value="task.id"
+        :checked="task.completed"
       />
-      <span :class="$style.text">{{ todo.title }}</span>
+      <span :class="$style.text">{{ task.title }}</span>
     </label>
     <button
       title="Delete task"
-      :data-task="todo.id"
+      :data-task="task.id"
       :class="$style.delete"
       @click.stop="handleClickDelete"
     >
@@ -56,6 +91,26 @@ const handleClickTask = () => {
 .task:hover {
   background: var(--task-hover-background);
 }
+
+.task {
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease;
+}
+
+.task.dragging {
+  opacity: 0.5;
+}
+
+.task.dragOver {
+  border: 2px solid greenyellow;
+}
+
+/* TODO[Improvement]: dragged task should take place of the dragged over task */
+/* .task.dragOver {
+  transform: translateY(54px);
+  background-color: var(--task-hover-background);
+} */
 
 .task .box {
   height: 100%;
