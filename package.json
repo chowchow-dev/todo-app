@@ -1,6 +1,7 @@
 {
   "name": "todo-app",
   "version": "0.0.1",
+  "homepage": "https://chowchow-dev.github.io/todo-app/",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,6 +10,7 @@
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:unit:coverage": "vitest run --coverage.enabled",
+    "deploy": "pnpm run build && gh-pages -d dist",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/"
   },
@@ -23,6 +25,7 @@
     "@vue/test-utils": "^2.4.6",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.23.0",
+    "gh-pages": "^6.1.1",
     "jsdom": "^24.1.0",
     "prettier": "^3.2.5",
     "vite": "^5.3.1",
