@@ -1,4 +1,5 @@
 /// <reference types="vitest" />
+
 import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
@@ -7,16 +8,11 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: '/todo-app/',
+  base: '/todo-app',
   plugins: [vue(), mode === 'development' && vueDevTools()].filter(Boolean),
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
-  },
-  css: {
-    modules: {
-      generateScopedName: mode === 'production' ? '[local]_[hash:base64:5]' : '[local]'
     }
   },
   test: {
