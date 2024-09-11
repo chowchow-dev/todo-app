@@ -1,5 +1,14 @@
 <script setup>
-import { More, Close, Check, TopRight, Edit, CopyDocument, Delete } from '@element-plus/icons-vue'
+import {
+  Star,
+  More,
+  Close,
+  Check,
+  TopRight,
+  Edit,
+  CopyDocument,
+  Delete
+} from '@element-plus/icons-vue'
 
 defineProps({
   task: {
@@ -74,7 +83,7 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
           >
             {{ task.completed ? 'Mark as undone' : 'Mark as done' }}
           </el-dropdown-item>
-          <!-- <el-dropdown-item :icon="CirclePlus">Pin</el-dropdown-item> -->
+          <el-dropdown-item :icon="Star">Pin</el-dropdown-item>
           <el-dropdown-item :icon="TopRight" @click="handleClickDetails"
             >Task details</el-dropdown-item
           >
@@ -89,19 +98,6 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
   </li>
 </template>
 <style module>
-.btnDrag {
-  cursor: move; /* fallback: no `url()` support or images disabled */
-  cursor: -webkit-grab; /* Chrome 1-21, Safari 4+ */
-  cursor: -moz-grab; /* Firefox 1.5-26 */
-  cursor: grab; /* W3C standards syntax, should come least */
-}
-
-.btnDrag.dragging {
-  cursor: -webkit-grabbing;
-  cursor: -moz-grabbing;
-  cursor: grabbing;
-}
-
 .task {
   position: relative;
   border-radius: calc(var(--spacing));
@@ -117,16 +113,19 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
 .task.high {
   background: #ff2f2fcc;
   color: #fff;
+  box-shadow: #ff2f2fcc 0px 0px 128px -20px;
 }
 
 .task.medium {
   background: #ffea28;
   color: #000;
+  box-shadow: #ffea28 0px 0px 128px -20px;
 }
 
 .task.low {
   background: #3dff7fcc;
   color: #000;
+  box-shadow: #3dff7fcc 0px 0px 128px -20px;
 }
 
 .task.completed .icon {
@@ -162,19 +161,6 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
 
 .task.dragOver {
   border: 2px solid greenyellow;
-}
-
-.dragBtn {
-  cursor: grabbing;
-}
-
-.task .box {
-  height: 100%;
-  width: calc(100% - 1rem - 3 * var(--spacing));
-  position: absolute;
-  top: 0;
-  left: 0;
-  appearance: none;
 }
 
 .task label {

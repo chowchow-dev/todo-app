@@ -1,10 +1,9 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
-import AddTodo from './components/AddTodo.vue'
 import TodoItem from './components/TodoItem.vue'
 import { nanoid } from 'nanoid'
 import { useLocalStorage } from './composables/useLocalStorage'
-import FormCreateTask from './components/FormCreateTask.vue'
+import CreateTaskDialog from './components/CreateTaskDialog.vue'
 import SearchTasks from './components/Search.vue'
 
 const localStorage = useLocalStorage('tasks')
@@ -91,7 +90,6 @@ watch(
 </script>
 
 <template>
-  <!-- <pre>{{ tasks }}</pre> -->
   <h1 :class="$style.title">📋 My tasks</h1>
 
   <SearchTasks @search="handleSearch" />
@@ -118,7 +116,7 @@ watch(
 
   <el-button circle type="default" icon="Plus" @click="createTaskDialogVisible = true" />
 
-  <FormCreateTask
+  <CreateTaskDialog
     :visible="createTaskDialogVisible"
     @onAddTask="handleAdd"
     @onClose="createTaskDialogVisible = false"
