@@ -29,7 +29,10 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
       {
         [$style.completed]: task.completed,
         [$style.dragging]: isDragging,
-        [$style.dragOver]: isDragOver
+        [$style.dragOver]: isDragOver,
+        [$style.high]: task.priority === 'high',
+        [$style.medium]: task.priority === 'medium',
+        [$style.low]: task.priority === 'low'
       }
     ]"
     draggable="true"
@@ -38,6 +41,10 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
     @dragend="$emit('dragend')"
     @drop="$emit('drop')"
   >
+    <el-icon v-if="task.completed" :class="[$style.icon, $style.iconAnimate]">
+      <Check />
+    </el-icon>
+
     <label :class="$style.label" :title="task.completed ? 'Reopen task' : 'Complete task'">
       <div :class="$style.labelText">
         <span :class="$style.text">{{ task.title }}</span>
@@ -96,23 +103,57 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
 }
 
 .task {
-  background: var(--task-background);
-  border-radius: calc(var(--spacing) / 2);
+  position: relative;
+  border-radius: calc(var(--spacing));
   display: flex;
   gap: var(--spacing);
   align-items: center;
   padding: calc(2 * var(--spacing));
-  position: relative;
-}
-
-.task:hover {
-  background: var(--task-hover-background);
-}
-
-.task {
   transition:
     background-color 0.3s ease,
     transform 0.3s ease;
+}
+
+.task.high {
+  background: #ff2f2fcc;
+  color: #fff;
+}
+
+.task.medium {
+  background: #ffea28;
+  color: #000;
+}
+
+.task.low {
+  background: #3dff7fcc;
+  color: #000;
+}
+
+.task.completed .icon {
+  padding: 8px;
+  border-radius: 8px;
+  margin-right: 8px;
+  color: #fff;
+}
+
+.task.completed.high .icon {
+  background-color: #dddddd9d;
+}
+
+.task.completed.medium .icon {
+  background-color: #4b4b4b6e;
+}
+
+.task.completed.low .icon {
+  background-color: #4b4b4b6e;
+}
+
+.task.completed {
+  border-left: 16px solid #00ff1ee3;
+  opacity: 0.8;
+  filter: none;
+  animation: 0.5s ease-in 0s 1 normal none running animation-completed;
+  transition: 0.3s !important;
 }
 
 .task.dragging {
@@ -145,16 +186,9 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
   align-items: center;
 }
 
-.task:hover .delete,
-.task .delete:focus-within {
-  color: var(--delete-color);
-  border-color: var(--delete-color);
-}
-
 .completed .text,
 .completed .desc {
   text-decoration: line-through;
-  color: var(--task-completed-color);
 }
 
 .delete {
@@ -168,8 +202,6 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
   display: grid;
   place-content: center;
   transition: all 0.2s;
-  color: transparent;
-  border: 2px solid transparent;
 }
 
 .labelText {
@@ -179,6 +211,10 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
   width: 100%;
 }
 
+.labelText .text {
+  font-weight: 600;
+}
+
 .badge {
   width: 100%;
   text-transform: capitalize;
@@ -186,7 +222,7 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
 
 .created {
   font-size: 0.8rem;
-  color: var(--task-completed-color);
+  /* color: var(--task-completed-color); */
   font-style: italic;
 }
 
@@ -194,11 +230,41 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
   width: 100%;
   text-align: left;
   font-size: 0.8rem;
-  color: var(--task-completed-color);
+  /* color: var(--task-completed-color); */
 }
 
 .btnMore {
   cursor: pointer;
   rotate: 90deg;
+}
+
+.icon {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.iconAnimate {
+  animation: popIn 0.3s ease-out forwards;
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes animation-completed {
+  0% {
+    opacity: 0;
+  }
 }
 </style>

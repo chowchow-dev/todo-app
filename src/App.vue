@@ -1,10 +1,11 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import AddTodo from './components/AddTodo.vue'
 import TodoItem from './components/TodoItem.vue'
 import { nanoid } from 'nanoid'
 import { useLocalStorage } from './composables/useLocalStorage'
 import FormCreateTask from './components/FormCreateTask.vue'
+import SearchTasks from './components/Search.vue'
 
 const localStorage = useLocalStorage('tasks')
 
@@ -66,6 +67,20 @@ const handleDrop = () => {
   draggedOverId.value = null
 }
 
+const searchQuery = ref('')
+const filteredTasks = computed(() => {
+  if (!searchQuery.value) return tasks.value
+  return tasks.value.filter(
+    (task) =>
+      task.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      (task.desc && task.desc.toLowerCase().includes(searchQuery.value.toLowerCase()))
+  )
+})
+
+const handleSearch = (query) => {
+  searchQuery.value = query
+}
+
 watch(
   tasks,
   (newTasks) => {
@@ -79,11 +94,13 @@ watch(
   <!-- <pre>{{ tasks }}</pre> -->
   <h1 :class="$style.title">📋 My tasks</h1>
 
+  <SearchTasks @search="handleSearch" />
+
   <ul :class="$style.todoList">
     <div :class="$style.emptyTaskText" v-if="tasks.length === 0">No tasks defined</div>
     <template v-else>
       <TodoItem
-        v-for="task in tasks"
+        v-for="task in filteredTasks"
         :key="task.id"
         :task="task"
         :dragId="task.id"
