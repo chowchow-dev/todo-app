@@ -54,12 +54,15 @@ defineEmits([
         [$style.low]: task.priority === 'low'
       }
     ]"
-    draggable="true"
-    @dragstart="$emit('dragstart', dragId)"
     @dragover.prevent="$emit('dragover', dragId)"
-    @dragend="$emit('dragend')"
     @drop="$emit('drop')"
+    @dragend="$emit('dragend')"
+    draggable="true"
   >
+    <el-icon :class="$style.iconDrag" @dragstart="$emit('dragstart', dragId)" draggable="true">
+      <Grid />
+    </el-icon>
+
     <el-icon v-if="task.completed" :class="[$style.icon, $style.iconAnimate]">
       <Check />
     </el-icon>
@@ -109,8 +112,6 @@ defineEmits([
 </template>
 <style module>
 .task {
-  cursor: grab;
-
   position: relative;
   border-radius: calc(var(--spacing));
   display: flex;
@@ -122,7 +123,11 @@ defineEmits([
     transform 0.3s ease;
 }
 
-.task:active {
+.task .iconDrag {
+  cursor: grab;
+}
+
+.task .iconDrag:active {
   cursor: grabbing;
 }
 

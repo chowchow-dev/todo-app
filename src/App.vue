@@ -17,6 +17,17 @@ const draggedItemId = ref(null)
 const taskDialogVisible = ref(false)
 const editingTask = ref(null)
 
+const searchQuery = ref('')
+
+const filteredTasks = computed(() => {
+  if (!searchQuery.value) return tasks.value
+  return tasks.value.filter(
+    (task) =>
+      task.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      (task.desc && task.desc.toLowerCase().includes(searchQuery.value.toLowerCase()))
+  )
+})
+
 const handleReopenOrCompleteTask = (id) => {
   tasks.value = tasks.value.map((task) => {
     if (task.id === id) {
@@ -87,20 +98,19 @@ const handleDuplicate = (id) => {
   }
 }
 
-const searchQuery = ref('')
-
-const filteredTasks = computed(() => {
-  if (!searchQuery.value) return tasks.value
-  return tasks.value.filter(
-    (task) =>
-      task.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      (task.desc && task.desc.toLowerCase().includes(searchQuery.value.toLowerCase()))
-  )
-})
-
 const handleSearch = (query) => {
   searchQuery.value = query
 }
+
+// TODO: impl this feature later
+// const handlePin = (id) => {
+//   tasks.value = tasks.value.map((task) => {
+//     if (task.id === id) {
+//       return { ...task, pinned: !task.pinned }
+//     }
+//     return task
+//   })
+// }
 
 watch(
   tasks,
@@ -134,7 +144,7 @@ watch(
           }
         "
         @duplicate="handleDuplicate"
-        @pin="console.log"
+        @pin="handlePin"
         @dragstart="() => handleDragStart(task, task.id, 'todo')"
         @dragover="() => handleDragOver(task.id)"
         @dragend="handleDragEnd"

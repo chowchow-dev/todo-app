@@ -51,7 +51,7 @@ const submitForm = (formEl) => {
       )
       formEl.resetFields()
     } else {
-      console.log('error submit!')
+      // TODO: error handling
     }
   })
 }
@@ -88,7 +88,6 @@ watch(
     destroy-on-close
     :before-close="
       (done) => {
-        console.log('before close', done)
         handleClickCancel(createTaskFormRef)
         done()
       }
