@@ -7,6 +7,10 @@
   --delete-color: firebrick;
 }
 
+* {
+  box-sizing: content-box;
+}
+
 body {
   font-size: 14pt;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -20,10 +24,6 @@ li {
   padding: 0;
   margin: 0;
   list-style-type: none;
-}
-
-* {
-  box-sizing: content-box;
 }
 
 input,

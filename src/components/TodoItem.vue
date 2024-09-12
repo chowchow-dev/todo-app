@@ -29,7 +29,17 @@ defineProps({
   }
 })
 
-defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend', 'drop'])
+defineEmits([
+  'delete',
+  'reopenOrCompleteTask',
+  'dragstart',
+  'dragover',
+  'dragend',
+  'drop',
+  'edit',
+  'duplicate',
+  'pin'
+])
 </script>
 <template>
   <li
@@ -57,7 +67,7 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
     <label :class="$style.label" :title="task.completed ? 'Reopen task' : 'Complete task'">
       <div :class="$style.labelText">
         <span :class="$style.text">{{ task.title }}</span>
-        <span :class="$style.created">{{ new Date(task.createdAt).toLocaleDateString() }}</span>
+        <span :class="$style.created">{{ new Date(task.createdAt).toLocaleString() }}</span>
       </div>
       <div v-if="task.desc" :class="$style.desc">{{ task.desc }}</div>
       <el-badge
@@ -83,12 +93,12 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
           >
             {{ task.completed ? 'Mark as undone' : 'Mark as done' }}
           </el-dropdown-item>
-          <el-dropdown-item :icon="Star">Pin</el-dropdown-item>
-          <el-dropdown-item :icon="TopRight" @click="handleClickDetails"
-            >Task details</el-dropdown-item
+          <el-dropdown-item :icon="Star" @click="$emit('pin', task.id)">Pin</el-dropdown-item>
+          <el-dropdown-item :icon="TopRight">Task details</el-dropdown-item>
+          <el-dropdown-item :icon="CopyDocument" @click="$emit('duplicate', task.id)"
+            >Duplicate</el-dropdown-item
           >
-          <el-dropdown-item divided :icon="Edit">Edit</el-dropdown-item>
-          <el-dropdown-item :icon="CopyDocument">Duplicate</el-dropdown-item>
+          <el-dropdown-item :icon="Edit" @click="$emit('edit', task)">Edit</el-dropdown-item>
           <el-dropdown-item :icon="Delete" @click="$emit('delete', task.id)"
             >Delete</el-dropdown-item
           >
@@ -99,6 +109,8 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
 </template>
 <style module>
 .task {
+  cursor: grab;
+
   position: relative;
   border-radius: calc(var(--spacing));
   display: flex;
@@ -108,6 +120,10 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
   transition:
     background-color 0.3s ease,
     transform 0.3s ease;
+}
+
+.task:active {
+  cursor: grabbing;
 }
 
 .task.high {
@@ -208,7 +224,6 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
 
 .created {
   font-size: 0.8rem;
-  /* color: var(--task-completed-color); */
   font-style: italic;
 }
 
@@ -216,7 +231,6 @@ defineEmits(['delete', 'reopenOrCompleteTask', 'dragstart', 'dragover', 'dragend
   width: 100%;
   text-align: left;
   font-size: 0.8rem;
-  /* color: var(--task-completed-color); */
 }
 
 .btnMore {

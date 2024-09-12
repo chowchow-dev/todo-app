@@ -1,10 +1,11 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
-import TodoItem from './components/TodoItem.vue'
 import { nanoid } from 'nanoid'
+
+import TodoItem from './components/TodoItem.vue'
 import { useLocalStorage } from './composables/useLocalStorage'
-import CreateTaskDialog from './components/CreateTaskDialog.vue'
 import SearchTasks from './components/Search.vue'
+import TaskDialog from './components/TaskDialog.vue'
 
 const localStorage = useLocalStorage('tasks')
 
@@ -13,7 +14,8 @@ const draggedTask = ref(null)
 const draggedOverId = ref(null)
 const draggedItemId = ref(null)
 
-const createTaskDialogVisible = ref(false)
+const taskDialogVisible = ref(false)
+const editingTask = ref(null)
 
 const handleReopenOrCompleteTask = (id) => {
   tasks.value = tasks.value.map((task) => {
@@ -25,28 +27,39 @@ const handleReopenOrCompleteTask = (id) => {
 }
 
 const handleAdd = (task) => {
-  const newTask = { id: nanoid(), ...task, completed: false, createdAt: new Date().toISOString() }
+  const newTask = { ...task, id: nanoid(), completed: false, createdAt: new Date().toISOString() }
   tasks.value = [newTask, ...tasks.value]
+}
+
+const handleEdit = (task) => {
+  const updatedTasks = tasks.value.map((t) => (t.id === task.id ? { ...t, ...task } : t))
+  tasks.value = updatedTasks
+}
+
+const handleSubmitTask = (task) => {
+  if (task.id) {
+    handleEdit(task)
+    editingTask.value = null
+  } else {
+    handleAdd(task)
+  }
+  taskDialogVisible.value = false
 }
 
 const handleDelete = (id) => {
   tasks.value = tasks.value.filter((task) => task.id !== id)
 }
 
-// TODO: cleanup this function
 const handleDragStart = (task, id) => {
-  console.log('drag start')
   draggedTask.value = { task, id }
   draggedItemId.value = id
 }
 
 const handleDragOver = (id) => {
-  console.log('drag over', id)
   draggedOverId.value = id
 }
 
 const handleDragEnd = () => {
-  console.log('drag end')
   draggedItemId.value = null
 }
 
@@ -66,7 +79,16 @@ const handleDrop = () => {
   draggedOverId.value = null
 }
 
+const handleDuplicate = (id) => {
+  const task = tasks.value.find((t) => t.id === id)
+  if (task) {
+    const newTask = { ...task, id: nanoid(), createdAt: new Date().toISOString() }
+    tasks.value = [newTask, ...tasks.value]
+  }
+}
+
 const searchQuery = ref('')
+
 const filteredTasks = computed(() => {
   if (!searchQuery.value) return tasks.value
   return tasks.value.filter(
@@ -92,11 +114,10 @@ watch(
 <template>
   <h1 :class="$style.title">📋 My tasks</h1>
 
-  <SearchTasks @search="handleSearch" />
+  <template v-if="tasks.length > 0">
+    <SearchTasks @search="handleSearch" />
 
-  <ul :class="$style.todoList">
-    <div :class="$style.emptyTaskText" v-if="tasks.length === 0">No tasks defined</div>
-    <template v-else>
+    <ul :class="$style.todoList">
       <TodoItem
         v-for="task in filteredTasks"
         :key="task.id"
@@ -105,21 +126,53 @@ watch(
         :isDragOver="draggedOverId === task.id"
         :isDragging="draggedItemId === task.id"
         @reopenOrCompleteTask="handleReopenOrCompleteTask"
+        @delete="handleDelete"
+        @edit="
+          (task) => {
+            editingTask = task
+            taskDialogVisible = true
+          }
+        "
+        @duplicate="handleDuplicate"
+        @pin="console.log"
         @dragstart="() => handleDragStart(task, task.id, 'todo')"
         @dragover="() => handleDragOver(task.id)"
         @dragend="handleDragEnd"
         @drop="handleDrop"
-        @delete="handleDelete"
       />
-    </template>
-  </ul>
+    </ul>
+  </template>
 
-  <el-button circle type="default" icon="Plus" @click="createTaskDialogVisible = true" />
+  <template v-else>
+    <div :class="$style.emptyTaskText">
+      <p :class="$style.emptyTaskTextTitle">No tasks defined</p>
+      <p :class="$style.emptyTaskTextSubtitle">Click on the + button to add a new task</p>
+    </div>
+  </template>
 
-  <CreateTaskDialog
-    :visible="createTaskDialogVisible"
-    @onAddTask="handleAdd"
-    @onClose="createTaskDialogVisible = false"
+  <el-button
+    circle
+    type="default"
+    icon="Plus"
+    :class="$style.addButton"
+    @click="
+      () => {
+        editingTask = null
+        taskDialogVisible = true
+      }
+    "
+  />
+
+  <TaskDialog
+    :visible="taskDialogVisible"
+    :initialData="editingTask"
+    @onSubmit="handleSubmitTask"
+    @onClose="
+      () => {
+        taskDialogVisible = false
+        editingTask = null
+      }
+    "
   />
 </template>
 
@@ -128,11 +181,22 @@ watch(
   text-align: center;
 }
 
-.emptyTaskText,
-.divider {
+.emptyTaskText {
   font-size: 1.5rem;
   font-weight: bold;
-  padding: calc(2 * var(--spacing));
+  text-align: center;
+  margin-top: calc(50vh - 113px - (113px / 2));
+}
+
+.emptyTaskTextTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.emptyTaskTextSubtitle {
+  font-size: 1rem;
+  font-weight: normal;
   text-align: center;
 }
 
@@ -143,5 +207,35 @@ watch(
   margin: 0 auto;
   gap: calc(2 * var(--spacing));
   margin-top: calc(2 * var(--spacing));
+}
+
+.addButton {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 64px !important;
+  height: 64px;
+  background-color: #b624ff;
+  font-size: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.addButton svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.addButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  background-color: #b624ff;
+  opacity: 0.8;
+}
+
+.addButton:active {
+  transform: scale(0.95);
 }
 </style>

@@ -1,21 +1,24 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 
-defineProps({
+const props = defineProps({
   visible: {
     type: Boolean,
     default: false
+  },
+  initialData: {
+    type: Object,
+    default: null
   }
 })
 
-const emit = defineEmits(['onAddTask', 'onClose'])
+const emit = defineEmits(['onSubmit', 'onClose'])
 
 const createTaskFormRef = ref()
 const createTaskForm = reactive({
   title: '',
   desc: '',
-  priority: '',
-  color: 'rgba(255, 69, 0, 0.68)'
+  priority: ''
 })
 
 const validateTitle = (rule, value, callback) => {
@@ -42,16 +45,57 @@ const submitForm = (formEl) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (valid) {
-      emit('onAddTask', createTaskForm)
-      emit('onClose')
+      emit(
+        'onSubmit',
+        props.initialData ? { ...createTaskForm, id: props.initialData.id } : createTaskForm
+      )
+      formEl.resetFields()
     } else {
       console.log('error submit!')
     }
   })
 }
+
+const handleClickCancel = (formEl) => {
+  if (!formEl) return
+  formEl.resetFields({
+    title: '',
+    desc: '',
+    priority: ''
+  })
+  emit('onClose')
+}
+
+watch(
+  () => props.initialData,
+  (newVal) => {
+    if (newVal) {
+      createTaskForm.title = props.initialData?.title
+      createTaskForm.desc = props.initialData?.desc
+      createTaskForm.priority = props.initialData?.priority
+    } else {
+      createTaskForm.title = ''
+      createTaskForm.desc = ''
+      createTaskForm.priority = ''
+    }
+  },
+  { deep: true }
+)
 </script>
 <template>
-  <el-dialog :model-value="visible" @close="emit('onClose')" title="Add new task" width="500">
+  <el-dialog
+    :model-value="visible"
+    destroy-on-close
+    :before-close="
+      (done) => {
+        console.log('before close', done)
+        handleClickCancel(createTaskFormRef)
+        done()
+      }
+    "
+    title="Add new task"
+    width="500"
+  >
     <el-form
       ref="createTaskFormRef"
       :model="createTaskForm"
@@ -73,13 +117,10 @@ const submitForm = (formEl) => {
           <el-option label="High" value="high" />
         </el-select>
       </el-form-item>
-      <el-form-item label="Color" prop="color">
-        <el-color-picker v-model="createTaskForm.color" show-alpha />
-      </el-form-item>
     </el-form>
 
     <template #footer>
-      <el-button @click="emit('onClose')">Cancel</el-button>
+      <el-button @click="handleClickCancel(createTaskFormRef)">Cancel</el-button>
       <el-button type="primary" @click="submitForm(createTaskFormRef)">Confirm</el-button>
     </template>
   </el-dialog>
